@@ -472,8 +472,8 @@ func init() {
 		h += "  paths    The request path (e.g. /users)\n"
 		h += "  apexes   The apex domain (e.g. example.com from sub.example.com)\n"
 		h += "  json     JSON encoded url/format objects\n"
-		h += "  format   Specify a custom format (see below)\n"
-		h += "  exts     Print a collection of all pages relative to all extensions\n\n"
+		h += "  exts     Print a collection of all pages relative to all extensions (json format)\n"
+		h += "  format   Specify a custom format (see below)\n\n"
 
 		h += "Format Directives:\n"
 		h += "  %%  A literal percent character\n"
