@@ -47,6 +47,7 @@ func main() {
 		"apexes":   apexes,
 		"json":     jsonFormat,
 		"format":   format,
+		"exts": extensions,
 	}[mode]
 
 	if !ok {
@@ -60,6 +61,7 @@ func main() {
 	sc.Buffer(buf, 1024*1024)
 
 	seen := make(map[string]bool)
+	extensions := make(map[string][]string)
 
 	for sc.Scan() {
 		u, err := parseURL(sc.Text())
@@ -85,12 +87,28 @@ func main() {
 				continue
 			}
 
-			fmt.Println(val)
+			if (mode == "exts") {
+				// we don't print until the end, but here we gather all out loot
+				extensions[val] = append(extensions[val], u.String()) // note: inefficient?
+			} else {
+				fmt.Println(val)
+			}
 
 			// no point using up memory if we're outputting dupes
 			if unique {
 				seen[val] = true
 			}
+		}
+	}
+	
+	// note: now we reached the end, if we we are exts only, we dump the whole table
+	if (mode == "exts") {
+		extJson, err := json.Marshal(extensions)
+
+		if err != nil {
+			fmt.Printf("Error: %s", err.Error())
+		} else {
+			fmt.Println(string(extJson))
 		}
 	}
 
@@ -284,6 +302,13 @@ func paths(u *url.URL, f string) []string {
 	return format(u, "%p")
 }
 
+// paths returns the extension of the URL. e.g.
+// for http://sub.example.com/path.php it will return
+// []string{".php"}
+func extensions(u *url.URL, f string) []string {
+	return format(u, "%e")
+}
+
 // format is a little bit like a special sprintf for
 // URLs; it will return a single formatted string
 // based on the URL and the format string. e.g. for
@@ -447,7 +472,8 @@ func init() {
 		h += "  paths    The request path (e.g. /users)\n"
 		h += "  apexes   The apex domain (e.g. example.com from sub.example.com)\n"
 		h += "  json     JSON encoded url/format objects\n"
-		h += "  format   Specify a custom format (see below)\n\n"
+		h += "  format   Specify a custom format (see below)\n"
+		h += "  exts     Print a collection of all pages relative to all extensions\n\n"
 
 		h += "Format Directives:\n"
 		h += "  %%  A literal percent character\n"
